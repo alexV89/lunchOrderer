@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@ResponseStatus
 @RequestMapping(path = "api/order")
 public class OrderController {
     @Autowired
@@ -18,9 +19,9 @@ public class OrderController {
     @Autowired
     private OrderItemService orderItemService;
 
-    @PostMapping()
-    public OrderDTO addNewOrder(@RequestBody OrderDTO orderDTO){
-        return orderService.addOrder(orderDTO);
+    @PostMapping(path = "/restaurant/{restaurantId}")
+    public OrderDTO addNewOrder(@PathVariable Long restaurantId){
+        return orderService.addOrder(restaurantId);
     }
 
     @PutMapping(path = "/{id}")
@@ -33,12 +34,8 @@ public class OrderController {
     }
 
     @DeleteMapping(path = "/{id}")
-    public String removeOrder(@PathVariable Long id, @RequestBody OrderDTO orderDTO){
-        try {
-            return orderService.removeOrder(id);
-        } catch (IdNotFoundException e) {
-            return e.getMessage();
-        }
+    public String removeOrder(@PathVariable Long id){
+        return orderService.removeOrder(id);
     }
 
     @GetMapping()

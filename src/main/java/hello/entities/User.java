@@ -35,12 +35,6 @@ public class User {
         email = userDTO.getEmail();
     }
 
-    public void addOrderItem(OrderItem orderItem){
-        orderItems.add(orderItem);
-    }
-
-    public void removeOrderItem(OrderItem orderItem) {orderItems.remove(orderItem);}
-
     public void update(UserDTO userDTO) throws TryingToUpdateIdException {
         if(userDTO.getId() != null){
             throw new TryingToUpdateIdException("User");

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@ResponseStatus
 @RequestMapping(path = "/api/user")
 public class UserController {
     @Autowired
@@ -22,11 +23,7 @@ public class UserController {
 
     @DeleteMapping(path="/{id}")
     public String deleteUserByID (@PathVariable Long id){
-        try {
-            return userService.deleteUser(id);
-        } catch (IdNotFoundException e) {
-            return e.getMessage();
-        }
+        return userService.deleteUser(id);
     }
 
     @PutMapping(path="/{id}")

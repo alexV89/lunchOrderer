@@ -1,5 +1,6 @@
 package hello.controllers;
 
+import hello.dtos.OrderDTO;
 import hello.exceptions.IdNotFoundException;
 import hello.dtos.RestaurantDTO;
 import hello.services.RestaurantService;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@ResponseStatus
 @RequestMapping(path = "/api/restaurant")
 public class RestaurantController {
     @Autowired
@@ -21,11 +23,7 @@ public class RestaurantController {
 
     @DeleteMapping(path="/{id}")
     public String deleteUserByID (@PathVariable Long id){
-        try {
-            return restaurantService.deleteRestaurant(id);
-        } catch (IdNotFoundException e) {
-            return e.getMessage();
-        }
+        return restaurantService.deleteRestaurant(id);
     }
 
     @PutMapping(path="/{id}")
@@ -42,5 +40,10 @@ public class RestaurantController {
     @GetMapping()
     public List<RestaurantDTO> getAllRestaurants() {
         return restaurantService.getAllRestaurants();
+    }
+
+    @GetMapping(path = "orders/restaurant/{restaurantId}")
+    public List<OrderDTO> getAllRestaurantOrders(@PathVariable Long restaurantId){
+        return restaurantService.getAllRestaurantOrders(restaurantId);
     }
 }

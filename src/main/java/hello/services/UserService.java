@@ -3,7 +3,6 @@ package hello.services;
 import hello.dtos.OrderItemDTO;
 import hello.entities.OrderItem;
 import hello.exceptions.IdNotFoundException;
-import hello.exceptions.TryingToUpdateIdException;
 import hello.Utils;
 import hello.dtos.UserDTO;
 import hello.entities.User;
@@ -13,8 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -44,7 +44,7 @@ public class UserService {
         }
         else {
             userRepository.delete(id);
-            return Utils.sendDeletedMessage(id);
+            return Utils.sendDeletedMessage();
         }
     }
 
@@ -55,39 +55,30 @@ public class UserService {
             throw new IdNotFoundException(id);
         }
         else {
-            try {
-                userToUpdate.update(userUpdateDTO);
-            } catch (TryingToUpdateIdException e) {
-                e.printStackTrace();
-                return userUpdateDTO;
-            }
+            userToUpdate.update(userUpdateDTO);
             userRepository.save(userToUpdate);
             return new UserDTO(userToUpdate);
         }
     }
 
+    @Transactional
     public List<UserDTO> getAllUsers(){
-        Iterable<User> users = userRepository.findAll();
-        List<UserDTO> userDTOS = new ArrayList<>();
+        List<User> restaurants = userRepository.findAll();
 
-        for(User it : users){
-            UserDTO userDTO = new UserDTO(it);
-            userDTOS.add(userDTO);
-        }
-
-        return userDTOS;
+        return restaurants.stream()
+                .map(UserDTO::new)
+                .collect(Collectors.toList());
     }
 
-
+    @Transactional
     public List<OrderItemDTO> getUsersOrderItems(Long userId){
-        Iterable<OrderItem> orderItems = orderItemRepository.findAll();
-        List<OrderItemDTO> orderItemDTOS = new ArrayList<>();
-        for(OrderItem it : orderItems){
-            if(it.getUser() != null && it.getUser().getId() == userId){
-                OrderItemDTO orderItemDTO = new OrderItemDTO(it);
-                orderItemDTOS.add(orderItemDTO);
-            }
-        }
-        return orderItemDTOS;
+        List<OrderItem> orderItems = orderItemRepository.findAll();
+
+        Stream<OrderItem> orderItemStream = orderItems.stream()
+                .filter( orderItem -> (userId == orderItem.getUser().getId()) );
+
+        return orderItemStream
+                .map(OrderItemDTO::new)
+                .collect(Collectors.toList());
     }
 }

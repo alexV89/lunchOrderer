@@ -16,7 +16,7 @@ public class OrderDTO {
     public OrderDTO(){}
     public OrderDTO(Order order){
         id = order.getId();
-        restaurantId = order.getRestaurant_id();
+        restaurantId = order.getRestaurant().getId();
         timestamp = order.getTimestamp();
     }
 }

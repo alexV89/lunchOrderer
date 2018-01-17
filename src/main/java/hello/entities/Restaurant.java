@@ -3,19 +3,19 @@ package hello.entities;
 import hello.exceptions.TryingToUpdateIdException;
 import hello.dtos.RestaurantDTO;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
+@Table (name = "`restaurant`")
 public class Restaurant {
 
     @Id
@@ -23,6 +23,9 @@ public class Restaurant {
     Long id;
     String name;
     String link;
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private List<Order> orders;
 
     public Restaurant(){}
 

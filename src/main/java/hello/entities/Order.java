@@ -1,14 +1,12 @@
 package hello.entities;
 
 import hello.dtos.OrderDTO;
-import hello.dtos.OrderItemDTO;
 import hello.exceptions.TryingToUpdateIdException;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -19,7 +17,11 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     Long id;
-    Long restaurant_id;
+
+    @ManyToOne (cascade = CascadeType.ALL)
+    @JoinColumn(name = "restaurant_id")
+    private Restaurant restaurant;
+
     Timestamp timestamp;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
@@ -27,23 +29,17 @@ public class Order {
 
     public Order(){}
 
-    public Order(OrderDTO orderDTO){
-        restaurant_id = orderDTO.getRestaurantId();
+    public Order(Restaurant restaurantArg){
+        restaurant = restaurantArg;
         timestamp = new Timestamp(System.currentTimeMillis());
     }
-
-    public void addOrderItem(OrderItem orderItem){
-        orderItems.add(orderItem);
-    }
-
-    public void removeOrderItem(OrderItem orderItem) {orderItems.remove(orderItem);}
 
     public void update(OrderDTO orderDTO) throws TryingToUpdateIdException {
         if(orderDTO.getId() != null){
             throw new TryingToUpdateIdException("order");
         }
         if(orderDTO.getRestaurantId() != null){
-            restaurant_id = orderDTO.getRestaurantId();
+            restaurant.setId(orderDTO.getRestaurantId());
         }
     }
 }

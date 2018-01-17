@@ -4,7 +4,6 @@ import hello.entities.Order;
 import hello.entities.OrderItem;
 import hello.entities.User;
 import hello.exceptions.IdNotFoundException;
-import hello.exceptions.TryingToUpdateIdException;
 import hello.Utils;
 import hello.dtos.OrderItemDTO;
 import hello.repositories.OrderItemRepository;
@@ -14,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderItemService {
@@ -35,13 +34,12 @@ public class OrderItemService {
 
     @Transactional
     public OrderItemDTO addOrderItem(OrderItemDTO orderItemDTO, Long orderId, Long userId){
-        /* pod ? */
         Order order = orderRepository.findOne(orderId);
         User user = userRepository.findOne(userId);
 
         OrderItem newOrderItem = new OrderItem(orderItemDTO, order, user);
         orderItemRepository.save(newOrderItem);
-        order.addOrderItem(newOrderItem);
+        order.getOrderItems().add(newOrderItem);
         return new OrderItemDTO(newOrderItem);
     }
 
@@ -52,7 +50,7 @@ public class OrderItemService {
         }
         else {
             orderItemRepository.delete(id);
-            return Utils.sendDeletedMessage(id);
+            return Utils.sendDeletedMessage();
         }
     }
 
@@ -63,27 +61,18 @@ public class OrderItemService {
             throw new IdNotFoundException(id);
         }
         else {
-            try {
-                orderItemToUpdate.update(orderItemDTO);
-            } catch (TryingToUpdateIdException e) {
-                e.printStackTrace();
-                return orderItemDTO;
-            }
+            orderItemToUpdate.update(orderItemDTO);
             orderItemRepository.save(orderItemToUpdate);
             return new OrderItemDTO(orderItemToUpdate);
         }
     }
 
-    @Transactional
-    public List<OrderItemDTO> getAllOrderItems(){
-        Iterable<OrderItem> orderItems = orderItemRepository.findAll();
-        List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
+    public List<OrderItemDTO> getAllOrderItems() {
+        List<OrderItem> orderItems = orderItemRepository.findAll();
 
-        for(OrderItem it : orderItems){
-            OrderItemDTO orderItemDTO = new OrderItemDTO(it);
-            orderItemDTOs.add(orderItemDTO);
-        }
-
-        return orderItemDTOs;
+        return orderItems.stream()
+                .map(OrderItemDTO::new)
+                .collect(Collectors.toList());
     }
 }
+
